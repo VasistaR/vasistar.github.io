@@ -20,8 +20,12 @@ import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs';
  * and put BASE back to ''.
  * ------------------------------------------------------------------------- */
 
-const SITE_URL = 'https://yourusername.github.io';
-const BASE = '';
+// Repo is VasistaR/personalportfolio-mk3 — a *project* site, so it serves from
+// a subdirectory and BASE must match the repo name. If you later rename the
+// repo to `VasistaR.github.io`, set BASE back to ''.
+// (GitHub lowercases the username in Pages URLs.)
+const SITE_URL = 'https://vasistar.github.io';
+const BASE = '/personalportfolio-mk3';
 
 export default defineConfig({
   site: SITE_URL,

@@ -5,27 +5,25 @@
 
 export const SITE = {
   /** Your name, shown in the header and used in page titles. */
-  name: 'Your Name',
+  name: 'Vasista Ramachandruni',
   /** Short role line under your name on the home page. */
   role: 'Aerospace Engineering + Computer Science',
-  /** Where you study, and when you graduate. */
-  school: 'Your University',
-  gradYear: '2028',
+  /** Where you study. */
+  school: 'University of Colorado Boulder',
   /** Used for <meta description> and social previews. */
   description:
     'Junior studying Aerospace Engineering and Computer Science. I build flight software, simulation tools, and things that leave the ground.',
-  /** Shown on the home page as a short "what I care about" paragraph. */
-  location: 'City, State',
-  email: 'you@example.com',
+  /** Used by the "Get in touch" button on the home page. */
+  email: 'vara9696@colorado.edu',
 } as const;
 
 /* ---------------------------------------------------------------------------
  * SOCIAL LINKS — delete any you don't want; the footer/home page adapt.
  * ------------------------------------------------------------------------- */
 export const SOCIALS = [
-  { label: 'GitHub', href: 'https://github.com/yourusername' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/yourusername' },
-  { label: 'Email', href: 'mailto:you@example.com' },
+  { label: 'GitHub', href: 'https://github.com/VasistaR' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/vasistar' },
+  { label: 'Email', href: 'mailto:vara9696@colorado.edu' },
   { label: 'Resume', href: '/resume.pdf' },
 ] as const;
 
