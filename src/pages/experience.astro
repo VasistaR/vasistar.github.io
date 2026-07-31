@@ -1,0 +1,278 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { EXPERIENCE, COURSEWORK, SKILLS } from '../data/experience';
+import { SOCIALS } from '../consts';
+import { withBase, isExternal } from '../utils/url';
+
+const resume = SOCIALS.find((s) => s.label === 'Resume');
+---
+
+<BaseLayout
+  title="Experience"
+  description="Internships, research, and team roles across aerospace engineering and software."
+>
+  <div class="wrap">
+    <header class="page-header">
+      <p class="eyebrow">Experience</p>
+      <h1>Where I've spent my time</h1>
+      <p class="lede">
+        Internships, lab research, and student teams — mostly at the point where flight hardware
+        meets the software that has to keep it honest.
+      </p>
+      {
+        resume && (
+          <p class="resume">
+            <a
+              class="btn"
+              href={withBase(resume.href)}
+              target={isExternal(resume.href) ? '_blank' : undefined}
+              rel={isExternal(resume.href) ? 'noopener noreferrer' : undefined}
+            >
+              Download resume ↓
+            </a>
+          </p>
+        )
+      }
+    </header>
+
+    <!-- ================= TIMELINE ================= -->
+    <ol class="timeline">
+      {
+        EXPERIENCE.map((job) => (
+          <li>
+            <div class="marker" aria-hidden="true" />
+            <div class="entry">
+              <p class="meta">
+                <span class="period">{job.period}</span>
+                <span class="kind">{job.kind}</span>
+              </p>
+              <h2>
+                {job.role}
+                <span class="at"> · </span>
+                {job.href ? (
+                  <a href={job.href} target="_blank" rel="noopener noreferrer">
+                    {job.org}
+                  </a>
+                ) : (
+                  <span class="org">{job.org}</span>
+                )}
+              </h2>
+              {job.location && <p class="location">{job.location}</p>}
+              <ul class="points">
+                {job.points.map((point) => (
+                  <li>{point}</li>
+                ))}
+              </ul>
+              {job.stack && (
+                <ul class="tag-list">
+                  {job.stack.map((s) => (
+                    <li class="tag">{s}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <!-- ================= SKILLS ================= -->
+    <section class="section">
+      <h2 class="eyebrow">Skills</h2>
+      <div class="grid-2">
+        {
+          SKILLS.map((group) => (
+            <div class="card panel">
+              <h3>{group.group}</h3>
+              <ul class="tag-list">
+                {group.items.map((item) => (
+                  <li class="tag">{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- ================= COURSEWORK ================= -->
+    <section class="section">
+      <h2 class="eyebrow">Relevant coursework</h2>
+      <div class="grid-2">
+        {
+          COURSEWORK.map((group) => (
+            <div class="card panel">
+              <h3>{group.group}</h3>
+              <ul class="courses">
+                {group.courses.map((c) => (
+                  <li>{c}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .resume {
+    margin-top: 1.75rem;
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .timeline > li {
+    position: relative;
+    padding-left: 2rem;
+    padding-bottom: 2.75rem;
+  }
+
+  /* Vertical rail, drawn on the <li> so it stops at the last entry. */
+  .timeline > li::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1.2rem;
+    bottom: -0.5rem;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline > li:last-child::before {
+    display: none;
+  }
+
+  .marker {
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border-strong);
+    transition: border-color 0.2s var(--ease);
+  }
+
+  .timeline > li:hover .marker {
+    border-color: var(--accent);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .period {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+  }
+
+  .kind {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+  }
+
+  .entry h2 {
+    font-size: 1.16rem;
+    letter-spacing: -0.015em;
+  }
+
+  .at {
+    color: var(--text-faint);
+    font-weight: 400;
+  }
+
+  .org {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .entry h2 a {
+    font-weight: 400;
+  }
+
+  .location {
+    font-size: 0.83rem;
+    color: var(--text-faint);
+    margin-top: 0.3rem;
+  }
+
+  .points {
+    margin: 0.9rem 0 0;
+    padding-inline-start: 1.05em;
+    max-width: var(--measure);
+  }
+
+  .points li {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    padding-left: 0.15rem;
+  }
+
+  .points li::marker {
+    color: var(--border-strong);
+  }
+
+  .points li + li {
+    margin-top: 0.45rem;
+  }
+
+  .entry .tag-list {
+    margin-top: 1rem;
+  }
+
+  /* ---------- panels ---------- */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 1.6rem;
+  }
+
+  .panel {
+    padding: 1.4rem;
+  }
+
+  .panel h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .courses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .courses li {
+    padding: 0.42rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .courses li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+</style>

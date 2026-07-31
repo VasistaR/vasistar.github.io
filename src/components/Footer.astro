@@ -1,0 +1,76 @@
+---
+import { SITE, SOCIALS } from '../consts';
+import { withBase, isExternal } from '../utils/url';
+
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="wrap inner">
+    <p class="colophon">
+      © {year} {SITE.name} · Built with <a href="https://astro.build">Astro</a>, deployed on GitHub
+      Pages
+    </p>
+    <ul class="links">
+      {
+        SOCIALS.map((s) => (
+          <li>
+            <a
+              href={withBase(s.href)}
+              target={isExternal(s.href) ? '_blank' : undefined}
+              rel={isExternal(s.href) ? 'noopener noreferrer' : undefined}
+            >
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>
+
+<style>
+  footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-tint);
+    padding-block: 1.8rem;
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+  }
+
+  .colophon {
+    font-size: 0.86rem;
+    color: var(--text-faint);
+  }
+
+  .colophon a {
+    color: var(--text-muted);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .links a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    color: var(--accent-text);
+  }
+</style>

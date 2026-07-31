@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .ring { fill: none; stroke: #1b4fd8; stroke-width: 2; }
+    .core { fill: #1b4fd8; }
+    .sat  { fill: #d1500f; }
+    @media (prefers-color-scheme: dark) {
+      .ring { stroke: #7aa5ff; }
+      .core { fill: #7aa5ff; }
+      .sat  { fill: #ff8a52; }
+    }
+  </style>
+  <ellipse class="ring" cx="16" cy="16" rx="14" ry="6.5" transform="rotate(-28 16 16)" />
+  <circle class="core" cx="16" cy="16" r="5" />
+  <circle class="sat" cx="27" cy="10" r="2.6" />
+</svg>

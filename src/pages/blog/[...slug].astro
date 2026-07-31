@@ -1,0 +1,215 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../utils/url';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft || import.meta.env.DEV);
+  const sorted = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  return sorted.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      // Newer posts come first, so "next" is the entry before this one.
+      newer: sorted[i - 1],
+      older: sorted[i + 1],
+    },
+  }));
+}
+
+type Props = {
+  post: CollectionEntry<'blog'>;
+  newer?: CollectionEntry<'blog'>;
+  older?: CollectionEntry<'blog'>;
+};
+
+const { post, newer, older } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(post);
+
+// Frontmatter dates like `2026-06-28` parse as UTC midnight. Format in UTC too,
+// otherwise anyone west of Greenwich sees every post dated a day early.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+
+// Astro's default markdown pipeline exposes an estimated read time via
+// remark plugins; fall back to a word-count estimate when it's absent.
+const readingTime: string | undefined = remarkPluginFrontmatter?.minutesRead;
+---
+
+<BaseLayout title={post.data.title} description={post.data.description} ogType="article">
+  <article class="wrap">
+    <a class="back arrow-link" href={withBase(`/blog`)}>
+      <span aria-hidden="true">←</span><span>Back to blog</span>
+    </a>
+
+    <header class="post-header">
+      <p class="meta">
+        <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+        {readingTime && <span class="sep">·</span>}
+        {readingTime && <span>{readingTime}</span>}
+      </p>
+
+      <h1>{post.data.title}</h1>
+      <p class="lede">{post.data.description}</p>
+
+      {
+        post.data.updatedDate && (
+          <p class="updated">Updated {fmt(post.data.updatedDate)}</p>
+        )
+      }
+
+      {
+        post.data.tags.length > 0 && (
+          <ul class="tag-list">
+            {post.data.tags.map((t) => (
+              <li class="tag">{t}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      (newer || older) && (
+        <nav class="post-nav" aria-label="More posts">
+          {older ? (
+            <a href={withBase(`/blog/${older.id}`)} class="nav-card">
+              <span class="dir">← Older</span>
+              <span class="nav-title">{older.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <a href={withBase(`/blog/${newer.id}`)} class="nav-card align-end">
+              <span class="dir">Newer →</span>
+              <span class="nav-title">{newer.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .back:hover {
+    color: var(--accent-text);
+  }
+
+  /* The arrow points left here, so slide it left on hover. */
+  .back:hover span:last-child {
+    transform: none;
+  }
+
+  .post-header {
+    max-width: var(--measure);
+    margin-block: 2.2rem 2.8rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .sep {
+    opacity: 0.5;
+  }
+
+  .post-header h1 {
+    font-size: var(--step-3);
+    margin-block: 0.85rem 1rem;
+  }
+
+  .updated {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-faint);
+    font-style: italic;
+  }
+
+  .post-header .tag-list {
+    margin-top: 1.3rem;
+  }
+
+  /* ---------- prev / next ---------- */
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
+  }
+
+  .nav-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .align-end {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .dir {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .nav-title {
+    font-size: 0.94rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 40rem) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+    .align-end {
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+</style>

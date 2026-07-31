@@ -1,0 +1,32 @@
+---
+/**
+ * Google Analytics 4.
+ *
+ * Renders nothing unless BOTH are true:
+ *   1. GA_MEASUREMENT_ID is set in src/consts.ts
+ *   2. This is a production build (so `npm run dev` never pollutes your data)
+ */
+import { GA_MEASUREMENT_ID } from '../consts';
+
+const enabled = Boolean(GA_MEASUREMENT_ID) && import.meta.env.PROD;
+---
+
+{
+  enabled && (
+    <>
+      <script
+        is:inline
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+      />
+      <script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID);
+      </script>
+    </>
+  )
+}

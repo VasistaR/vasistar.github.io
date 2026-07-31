@@ -1,0 +1,109 @@
+---
+/**
+ * Three-state theme control: System → Light → Dark → System.
+ *
+ * "System" is the default and stores nothing, so the site keeps following the
+ * OS setting (including live changes) until the visitor deliberately overrides.
+ */
+---
+
+<button id="theme-toggle" type="button" title="Change theme" aria-live="polite">
+  <span class="icon" data-icon="system" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+      <path d="M8 21h8m-4-4v4"></path>
+    </svg>
+  </span>
+  <span class="icon" data-icon="light" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+    </svg>
+  </span>
+  <span class="icon" data-icon="dark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </span>
+  <span class="visually-hidden" id="theme-label">Theme</span>
+</button>
+
+<style>
+  #theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
+  }
+
+  #theme-toggle:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  /* All three icons stack in the same grid cell; only the active one shows. */
+  .icon {
+    grid-area: 1 / 1;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transform: scale(0.6) rotate(-25deg);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+
+  .icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  :global(html[data-mode='system']) .icon[data-icon='system'],
+  :global(html[data-mode='light']) .icon[data-icon='light'],
+  :global(html[data-mode='dark']) .icon[data-icon='dark'] {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var label = document.getElementById('theme-label');
+    var media = window.matchMedia('(prefers-color-scheme: dark)');
+    var ORDER = ['system', 'light', 'dark'];
+
+    function currentMode() {
+      var stored = localStorage.getItem('theme');
+      return stored === 'light' || stored === 'dark' ? stored : 'system';
+    }
+
+    function apply(mode) {
+      root.dataset.mode = mode;
+      root.dataset.theme = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
+      var text = mode.charAt(0).toUpperCase() + mode.slice(1);
+      btn.setAttribute('aria-label', 'Theme: ' + text + '. Click to change.');
+      label.textContent = 'Theme: ' + text;
+    }
+
+    apply(currentMode());
+
+    btn.addEventListener('click', function () {
+      var next = ORDER[(ORDER.indexOf(currentMode()) + 1) % ORDER.length];
+      if (next === 'system') localStorage.removeItem('theme');
+      else localStorage.setItem('theme', next);
+      apply(next);
+    });
+
+    // Follow live OS changes while we're in "system" mode.
+    media.addEventListener('change', function () {
+      if (currentMode() === 'system') apply('system');
+    });
+  })();
+</script>

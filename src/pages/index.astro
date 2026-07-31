@@ -1,0 +1,461 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, SOCIALS } from '../consts';
+import { PROJECTS } from '../data/projects';
+import { EXPERIENCE } from '../data/experience';
+import { withBase, isExternal } from '../utils/url';
+
+const featured = PROJECTS.filter((p) => p.featured).slice(0, 3);
+const recentRoles = EXPERIENCE.slice(0, 3);
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 2);
+
+// Frontmatter dates like `2026-06-28` parse as UTC midnight. Format in UTC too,
+// otherwise anyone west of Greenwich sees every post dated a day early.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<BaseLayout>
+  <div class="wrap">
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow status">
+          <span class="dot" aria-hidden="true"></span>
+          Open to Summer 2027 internships
+        </p>
+
+        <h1>
+          Hi, I'm {SITE.name.split(' ')[0]}. I build software for things that
+          <span class="grad">leave the ground</span>.
+        </h1>
+
+        <p class="lede">
+          Incoming junior at {SITE.school} studying {SITE.role}. I care about the seam between the
+          two — flight software, simulation tooling, and the unglamorous infrastructure that turns
+          test data into decisions.
+        </p>
+
+        <div class="cta">
+          <a class="btn btn-primary" href={withBase(`/projects`)}>See my work</a>
+          <a class="btn" href={`mailto:${SITE.email}`}>Get in touch</a>
+        </div>
+
+        <ul class="socials">
+          {
+            SOCIALS.map((s) => (
+              <li>
+                <a
+                  href={withBase(s.href)}
+                  target={isExternal(s.href) ? '_blank' : undefined}
+                  rel={isExternal(s.href) ? 'noopener noreferrer' : undefined}
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Decorative orbit diagram. Purely visual, hidden from screen readers. -->
+      <div class="orbit" aria-hidden="true">
+        <svg viewBox="0 0 240 240" fill="none" stroke-linecap="round">
+          <circle class="ring" cx="120" cy="120" r="112" stroke-dasharray="2 7"></circle>
+          <circle class="ring" cx="120" cy="120" r="84"></circle>
+          <ellipse class="ring" cx="120" cy="120" rx="112" ry="46" transform="rotate(-24 120 120)"
+          ></ellipse>
+          <circle class="body" cx="120" cy="120" r="17"></circle>
+          <circle class="body-inner" cx="120" cy="120" r="8"></circle>
+          <g class="spin">
+            <circle class="sat" cx="120" cy="36" r="4.5"></circle>
+          </g>
+          <g class="spin slow">
+            <circle class="sat alt" cx="204" cy="120" r="3"></circle>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================= FEATURED PROJECTS ================= -->
+    <section class="section">
+      <h2 class="eyebrow">Selected projects</h2>
+      <div class="feature-grid">
+        {
+          featured.map((p) => (
+            <article class="card feature">
+              <header>
+                <h3>{p.title}</h3>
+                <span class="year">{p.year}</span>
+              </header>
+              <p>{p.blurb}</p>
+              {p.highlight && (
+                <p class="stat">
+                  <strong>{p.highlight.value}</strong> {p.highlight.label}
+                </p>
+              )}
+              <ul class="tag-list">
+                {p.tags.slice(0, 3).map((t) => (
+                  <li class="tag">{t}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+      <a class="arrow-link more" href={withBase(`/projects`)}>
+        <span>All projects</span><span>→</span>
+      </a>
+    </section>
+
+    <!-- ================= EXPERIENCE SNAPSHOT ================= -->
+    <section class="section">
+      <h2 class="eyebrow">Where I've worked</h2>
+      <ul class="roles">
+        {
+          recentRoles.map((r) => (
+            <li>
+              <span class="role-period">{r.period}</span>
+              <span class="role-title">{r.role}</span>
+              <span class="role-org">{r.org}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="arrow-link more" href={withBase(`/experience`)}>
+        <span>Full experience</span><span>→</span>
+      </a>
+    </section>
+
+    <!-- ================= RECENT WRITING ================= -->
+    {
+      posts.length > 0 && (
+        <section class="section">
+          <h2 class="eyebrow">Recent writing</h2>
+          <ul class="posts">
+            {posts.map((post) => (
+              <li>
+                <a href={withBase(`/blog/${post.id}`)}>
+                  <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+                  <span class="post-title">{post.data.title}</span>
+                  <span class="post-desc">{post.data.description}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a class="arrow-link more" href={withBase(`/blog`)}>
+            <span>All posts</span>
+            <span>→</span>
+          </a>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  /* ---------- hero ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(2rem, 6vw, 4rem);
+  }
+
+  .status {
+    color: var(--text-muted);
+  }
+
+  .status::after {
+    display: none; /* no trailing rule on this one */
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #22c55e 20%, transparent);
+    animation: pulse 2.4s var(--ease) infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      box-shadow: 0 0 0 6px color-mix(in srgb, #22c55e 0%, transparent);
+    }
+  }
+
+  .hero h1 {
+    margin-block: 1.4rem 1.5rem;
+  }
+
+  .grad {
+    background: linear-gradient(100deg, var(--accent) 10%, var(--ember) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 2rem;
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+  }
+
+  .socials a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+
+  .socials a:hover {
+    color: var(--accent-text);
+    border-bottom-color: currentColor;
+  }
+
+  /* ---------- orbit graphic ---------- */
+  .orbit {
+    width: clamp(200px, 24vw, 300px);
+  }
+
+  .orbit svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .ring {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    fill: none;
+  }
+
+  .body {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 1.2;
+  }
+
+  .body-inner {
+    fill: var(--accent);
+    opacity: 0.85;
+  }
+
+  .sat {
+    fill: var(--ember);
+  }
+
+  .sat.alt {
+    fill: var(--accent);
+  }
+
+  .spin {
+    transform-origin: 120px 120px;
+    animation: orbit 18s linear infinite;
+  }
+
+  .spin.slow {
+    animation-duration: 34s;
+    animation-direction: reverse;
+  }
+
+  @keyframes orbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    .orbit {
+      display: none;
+    }
+  }
+
+  /* ---------- featured projects ---------- */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+    gap: 1rem;
+    margin-top: 1.6rem;
+  }
+
+  .feature {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.4rem;
+  }
+
+  .feature:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+  }
+
+  .feature header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .feature h3 {
+    font-size: 1.06rem;
+  }
+
+  .year {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+
+  .feature p {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .stat {
+    font-size: 0.82rem !important;
+    color: var(--text-faint) !important;
+  }
+
+  .stat strong {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--ember);
+    margin-right: 0.35rem;
+  }
+
+  .feature .tag-list {
+    margin-top: auto;
+    padding-top: 0.4rem;
+  }
+
+  .more {
+    display: inline-flex;
+    margin-top: 1.6rem;
+    font-size: 0.9rem;
+  }
+
+  /* ---------- roles ---------- */
+  .roles {
+    list-style: none;
+    margin: 1.4rem 0 0;
+    padding: 0;
+  }
+
+  .roles li {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .roles li:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .role-period {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .role-title {
+    font-weight: 500;
+  }
+
+  .role-org {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 40rem) {
+    .roles li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+
+  /* ---------- posts ---------- */
+  .posts {
+    list-style: none;
+    margin: 1.4rem 0 0;
+    padding: 0;
+  }
+
+  .posts a {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0.25rem 1.5rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .posts li:last-child a {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .posts time {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    padding-top: 0.2rem;
+  }
+
+  .post-title {
+    font-weight: 500;
+    transition: color 0.15s var(--ease);
+  }
+
+  .posts a:hover .post-title {
+    color: var(--accent-text);
+  }
+
+  .post-desc {
+    grid-column: 2;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 40rem) {
+    .posts a {
+      grid-template-columns: 1fr;
+    }
+    .post-desc {
+      grid-column: 1;
+    }
+  }
+</style>

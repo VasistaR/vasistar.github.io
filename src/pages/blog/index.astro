@@ -1,0 +1,208 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../utils/url';
+
+// Drafts are excluded from the production build but still visible in `npm run dev`.
+const posts = (await getCollection('blog', ({ data }) => !data.draft || import.meta.env.DEV)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Group by year for the listing rails.
+const byYear = new Map<number, typeof posts>();
+for (const post of posts) {
+  const year = post.data.pubDate.getUTCFullYear();
+  if (!byYear.has(year)) byYear.set(year, []);
+  byYear.get(year)!.push(post);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+
+// Frontmatter dates like `2026-06-28` parse as UTC midnight. Format in UTC too,
+// otherwise anyone west of Greenwich sees every post dated a day early.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+
+<BaseLayout
+  title="Blog"
+  description="Notes on aerospace engineering, flight software, and things I've had to figure out."
+>
+  <div class="wrap">
+    <header class="page-header">
+      <p class="eyebrow">Blog</p>
+      <h1>Notes and write-ups</h1>
+      <p class="lede">
+        Mostly things I had to figure out the hard way and wanted to write down before I forgot
+        them. Occasionally a proper project post-mortem.
+      </p>
+      <p class="feed">
+        <a href={withBase(`/rss.xml`)}>RSS feed →</a>
+      </p>
+    </header>
+
+    {
+      posts.length === 0 ? (
+        <p class="empty">
+          No posts yet. Add a <code>.md</code> file to <code>src/content/blog/</code> to publish
+          one.
+        </p>
+      ) : (
+        years.map((year) => (
+          <section class="year-block">
+            <h2 class="year">{year}</h2>
+            <ul class="list">
+              {byYear.get(year)!.map((post) => (
+                <li>
+                  <a href={withBase(`/blog/${post.id}`)}>
+                    <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+                    <div class="body">
+                      <h3>
+                        {post.data.title}
+                        {post.data.draft && <span class="draft">Draft</span>}
+                      </h3>
+                      <p>{post.data.description}</p>
+                      {post.data.tags.length > 0 && (
+                        <ul class="tag-list">
+                          {post.data.tags.map((t) => (
+                            <li class="tag">{t}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <span class="chev" aria-hidden="true">
+                      →
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .feed {
+    margin-top: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  .feed a {
+    text-decoration: none;
+  }
+
+  .empty {
+    color: var(--text-muted);
+  }
+
+  .empty code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.13em 0.4em;
+  }
+
+  .year-block + .year-block {
+    margin-top: 3rem;
+  }
+
+  .year {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .list a {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 1.5rem 0.9rem 1.5rem 0.75rem;
+    margin-inline: -0.75rem;
+    border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.18s var(--ease);
+  }
+
+  .list a:hover {
+    background: var(--surface-2);
+  }
+
+  .list time {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    padding-top: 0.3rem;
+  }
+
+  .body h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.08rem;
+    transition: color 0.15s var(--ease);
+  }
+
+  .list a:hover .body h3 {
+    color: var(--accent-text);
+  }
+
+  .draft {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ember);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .body p {
+    margin-top: 0.45rem;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 58ch;
+  }
+
+  .body .tag-list {
+    margin-top: 0.8rem;
+  }
+
+  .chev {
+    color: var(--text-faint);
+    padding-top: 0.2rem;
+    transition: transform 0.2s var(--ease), color 0.2s var(--ease);
+  }
+
+  .list a:hover .chev {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 40rem) {
+    .list a {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    .chev {
+      display: none;
+    }
+  }
+</style>
