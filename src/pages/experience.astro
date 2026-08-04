@@ -1,10 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { EXPERIENCE, COURSEWORK, SKILLS } from '../data/experience';
-import { SOCIALS } from '../consts';
-import { withBase, isExternal } from '../utils/url';
-
-const resume = SOCIALS.find((s) => s.label === 'Resume');
+import { RESUME_PDF } from '../consts';
+import { withBase } from '../utils/url';
 ---
 
 <BaseLayout
@@ -20,14 +18,9 @@ const resume = SOCIALS.find((s) => s.label === 'Resume');
         meets the software that has to keep it honest.
       </p>
       {
-        resume && (
+        RESUME_PDF && (
           <p class="resume">
-            <a
-              class="btn"
-              href={withBase(resume.href)}
-              target={isExternal(resume.href) ? '_blank' : undefined}
-              rel={isExternal(resume.href) ? 'noopener noreferrer' : undefined}
-            >
+            <a class="btn" href={withBase(RESUME_PDF)} target="_blank" rel="noopener noreferrer">
               Download resume ↓
             </a>
           </p>

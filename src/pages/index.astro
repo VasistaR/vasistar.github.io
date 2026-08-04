@@ -5,6 +5,15 @@ import { SITE, SOCIALS } from '../consts';
 import { PROJECTS } from '../data/projects';
 import { EXPERIENCE } from '../data/experience';
 import { withBase, isExternal } from '../utils/url';
+import SocialIcon from '../components/SocialIcon.astro';
+
+// Falls back to an initials monogram until a headshot path is set in consts.ts.
+const initials = SITE.name
+  .split(' ')
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
 
 const featured = PROJECTS.filter((p) => p.featured).slice(0, 3);
 const recentRoles = EXPERIENCE.slice(0, 3);
@@ -59,7 +68,8 @@ const fmt = (d: Date) =>
                   target={isExternal(s.href) ? '_blank' : undefined}
                   rel={isExternal(s.href) ? 'noopener noreferrer' : undefined}
                 >
-                  {s.label}
+                  <SocialIcon name={s.icon} />
+                  <span>{s.label}</span>
                 </a>
               </li>
             ))
@@ -67,21 +77,77 @@ const fmt = (d: Date) =>
         </ul>
       </div>
 
-      <!-- Decorative orbit diagram. Purely visual, hidden from screen readers. -->
-      <div class="orbit" aria-hidden="true">
-        <svg viewBox="0 0 240 240" fill="none" stroke-linecap="round">
+      <!--
+        Orbit diagram with the headshot at its centre. The two planets travel
+        genuinely separate paths: one along the tilted outer ellipse, one along
+        the upright inner circle, in opposite directions.
+      -->
+      <div class="orbit">
+        <svg viewBox="0 0 240 240" role="img" aria-label={`Portrait of ${SITE.name}`}>
+          <defs>
+            <clipPath id="headshot-clip">
+              <circle cx="120" cy="120" r="46"></circle>
+            </clipPath>
+            <!-- Tilted outer track (matches the drawn ellipse below). -->
+            <path
+              id="orbit-outer"
+              d="M 8,120 A 112,46 0 1,1 232,120 A 112,46 0 1,1 8,120"
+              fill="none"></path>
+            <!-- Upright inner track (matches the drawn circle below). -->
+            <path
+              id="orbit-inner"
+              d="M 38,120 A 82,82 0 1,1 202,120 A 82,82 0 1,1 38,120"
+              fill="none"></path>
+          </defs>
+
+          <!-- Rings -->
           <circle class="ring" cx="120" cy="120" r="112" stroke-dasharray="2 7"></circle>
-          <circle class="ring" cx="120" cy="120" r="84"></circle>
+          <circle class="ring" cx="120" cy="120" r="82"></circle>
           <ellipse class="ring" cx="120" cy="120" rx="112" ry="46" transform="rotate(-24 120 120)"
           ></ellipse>
-          <circle class="body" cx="120" cy="120" r="17"></circle>
-          <circle class="body-inner" cx="120" cy="120" r="8"></circle>
-          <g class="spin">
-            <circle class="sat" cx="120" cy="36" r="4.5"></circle>
+
+          <!-- Headshot, or initials until one is set -->
+          <circle class="hs-bg" cx="120" cy="120" r="46"></circle>
+          {
+            SITE.headshot ? (
+              <image
+                href={withBase(SITE.headshot)}
+                x="74"
+                y="74"
+                width="92"
+                height="92"
+                clip-path="url(#headshot-clip)"
+                preserveAspectRatio="xMidYMid slice"
+              />
+            ) : (
+              <text class="hs-initials" x="120" y="120" text-anchor="middle" dy="0.35em">
+                {initials}
+              </text>
+            )
+          }
+          <circle class="hs-ring" cx="120" cy="120" r="46"></circle>
+
+          <!-- Planet 1 — tilted elliptical orbit -->
+          <g transform="rotate(-24 120 120)">
+            <circle class="sat" r="5">
+              <animateMotion dur="22s" repeatCount="indefinite">
+                <mpath href="#orbit-outer" xlink:href="#orbit-outer" />
+              </animateMotion>
+            </circle>
           </g>
-          <g class="spin slow">
-            <circle class="sat alt" cx="204" cy="120" r="3"></circle>
-          </g>
+
+          <!-- Planet 2 — upright circular orbit, opposite direction -->
+          <circle class="sat alt" r="3.5">
+            <animateMotion
+              dur="14s"
+              repeatCount="indefinite"
+              calcMode="linear"
+              keyPoints="1;0"
+              keyTimes="0;1"
+            >
+              <mpath href="#orbit-inner" xlink:href="#orbit-inner" />
+            </animateMotion>
+          </circle>
         </svg>
       </div>
     </section>
@@ -162,6 +228,17 @@ const fmt = (d: Date) =>
   </div>
 </BaseLayout>
 
+<!--
+  The global prefers-reduced-motion rule in global.css only reaches CSS
+  animations; the orbit uses SMIL <animateMotion>, which has to be paused
+  through the DOM instead.
+-->
+<script is:inline>
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelector('.orbit svg')?.pauseAnimations();
+  }
+</script>
+
 <style>
   /* ---------- hero ---------- */
   .hero {
@@ -222,23 +299,38 @@ const fmt = (d: Date) =>
   }
 
   .socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
     font-family: var(--font-mono);
     font-size: 0.78rem;
     letter-spacing: 0.04em;
     color: var(--text-muted);
     text-decoration: none;
+  }
+
+  /* Underline only the label, so the icon isn't clipped by the rule. */
+  .socials a span {
     border-bottom: 1px solid transparent;
     padding-bottom: 2px;
+    transition: border-color 0.15s var(--ease);
   }
 
   .socials a:hover {
     color: var(--accent-text);
+  }
+
+  .socials a:hover span {
     border-bottom-color: currentColor;
   }
 
-  /* ---------- orbit graphic ---------- */
+  .socials :global(.social-icon) {
+    font-size: 1.05rem;
+  }
+
+  /* ---------- orbit graphic + headshot ---------- */
   .orbit {
-    width: clamp(200px, 24vw, 300px);
+    width: clamp(230px, 27vw, 330px);
   }
 
   .orbit svg {
@@ -253,15 +345,23 @@ const fmt = (d: Date) =>
     fill: none;
   }
 
-  .body {
-    fill: var(--accent-soft);
-    stroke: var(--accent);
-    stroke-width: 1.2;
+  /* Sits behind the portrait so a transparent PNG still reads cleanly. */
+  .hs-bg {
+    fill: var(--surface-2);
   }
 
-  .body-inner {
-    fill: var(--accent);
-    opacity: 0.85;
+  .hs-ring {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    opacity: 0.55;
+  }
+
+  .hs-initials {
+    fill: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 30px;
+    letter-spacing: 0.06em;
   }
 
   .sat {
@@ -272,28 +372,28 @@ const fmt = (d: Date) =>
     fill: var(--accent);
   }
 
-  .spin {
-    transform-origin: 120px 120px;
-    animation: orbit 18s linear infinite;
-  }
-
-  .spin.slow {
-    animation-duration: 34s;
-    animation-direction: reverse;
-  }
-
-  @keyframes orbit {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @media (max-width: 52rem) {
     .hero {
       grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
     }
+    .lede {
+      margin-inline: auto;
+    }
+    .cta,
+    .socials,
+    .status {
+      justify-content: center;
+    }
+    /*
+      Lead with the portrait on phones. Left below the copy it lands well past
+      the fold, which defeats the point of having it.
+    */
     .orbit {
-      display: none;
+      order: -1;
+      width: min(215px, 54vw);
+      margin-bottom: 0.5rem;
     }
   }
 

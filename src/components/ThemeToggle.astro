@@ -1,19 +1,18 @@
 ---
 /**
- * Three-state theme control: System → Light → Dark → System.
+ * Two-state theme control: Light ⇄ Dark.
  *
- * "System" is the default and stores nothing, so the site keeps following the
- * OS setting (including live changes) until the visitor deliberately overrides.
+ * The site's *default* still follows the operating system — that's handled by
+ * the inline bootstrap in BaseHead.astro, which reads the OS preference when
+ * nothing is stored. This button only comes into play once someone overrides
+ * it, at which point the choice is remembered in localStorage.
+ *
+ * Until that first click there is no stored value, so the site keeps tracking
+ * live OS changes.
  */
 ---
 
 <button id="theme-toggle" type="button" title="Change theme" aria-live="polite">
-  <span class="icon" data-icon="system" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-      <path d="M8 21h8m-4-4v4"></path>
-    </svg>
-  </span>
   <span class="icon" data-icon="light" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="4"></circle>
@@ -48,7 +47,7 @@
     border-color: var(--border-strong);
   }
 
-  /* All three icons stack in the same grid cell; only the active one shows. */
+  /* Both icons stack in the same grid cell; only the active one shows. */
   .icon {
     grid-area: 1 / 1;
     display: grid;
@@ -63,11 +62,32 @@
     height: 17px;
   }
 
-  :global(html[data-mode='system']) .icon[data-icon='system'],
-  :global(html[data-mode='light']) .icon[data-icon='light'],
-  :global(html[data-mode='dark']) .icon[data-icon='dark'] {
+  /*
+    Fallback: show the sun when `data-theme` is missing — JS disabled or
+    blocked, or a stale cached stylesheet — so the button is never empty.
+    Light is the right fallback because the palette in global.css is light
+    until `[data-theme='dark']` is set, so the icon always matches the page.
+  */
+  .icon[data-icon='light'] {
     opacity: 1;
     transform: scale(1) rotate(0);
+  }
+
+  /*
+    An explicit theme on <html> wins over the OS fallback above. These selectors
+    are more specific than the plain `.icon[...]` rules, so ordering is not
+    load-bearing.
+  */
+  :global(html[data-theme='light']) .icon[data-icon='light'],
+  :global(html[data-theme='dark']) .icon[data-icon='dark'] {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+
+  :global(html[data-theme='light']) .icon[data-icon='dark'],
+  :global(html[data-theme='dark']) .icon[data-icon='light'] {
+    opacity: 0;
+    transform: scale(0.6) rotate(-25deg);
   }
 </style>
 
@@ -77,33 +97,31 @@
     var btn = document.getElementById('theme-toggle');
     var label = document.getElementById('theme-label');
     var media = window.matchMedia('(prefers-color-scheme: dark)');
-    var ORDER = ['system', 'light', 'dark'];
 
-    function currentMode() {
-      var stored = localStorage.getItem('theme');
-      return stored === 'light' || stored === 'dark' ? stored : 'system';
+    /** Stored override, or null while we're still following the OS. */
+    function stored() {
+      var v = localStorage.getItem('theme');
+      return v === 'light' || v === 'dark' ? v : null;
     }
 
-    function apply(mode) {
-      root.dataset.mode = mode;
-      root.dataset.theme = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
-      var text = mode.charAt(0).toUpperCase() + mode.slice(1);
-      btn.setAttribute('aria-label', 'Theme: ' + text + '. Click to change.');
-      label.textContent = 'Theme: ' + text;
+    function apply(theme) {
+      root.dataset.theme = theme;
+      var next = theme === 'dark' ? 'light' : 'dark';
+      btn.setAttribute('aria-label', 'Switch to ' + next + ' theme');
+      label.textContent = theme === 'dark' ? 'Dark theme' : 'Light theme';
     }
 
-    apply(currentMode());
+    apply(stored() || (media.matches ? 'dark' : 'light'));
 
     btn.addEventListener('click', function () {
-      var next = ORDER[(ORDER.indexOf(currentMode()) + 1) % ORDER.length];
-      if (next === 'system') localStorage.removeItem('theme');
-      else localStorage.setItem('theme', next);
+      var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
       apply(next);
     });
 
-    // Follow live OS changes while we're in "system" mode.
+    // Keep following the OS until the visitor has made an explicit choice.
     media.addEventListener('change', function () {
-      if (currentMode() === 'system') apply('system');
+      if (!stored()) apply(media.matches ? 'dark' : 'light');
     });
   })();
 </script>

@@ -1,6 +1,7 @@
 ---
 import { SITE, SOCIALS } from '../consts';
 import { withBase, isExternal } from '../utils/url';
+import SocialIcon from './SocialIcon.astro';
 
 const year = new Date().getFullYear();
 ---
@@ -20,7 +21,8 @@ const year = new Date().getFullYear();
               target={isExternal(s.href) ? '_blank' : undefined}
               rel={isExternal(s.href) ? 'noopener noreferrer' : undefined}
             >
-              {s.label}
+              <SocialIcon name={s.icon} />
+              <span>{s.label}</span>
             </a>
           </li>
         ))
@@ -63,6 +65,9 @@ const year = new Date().getFullYear();
   }
 
   .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
     font-family: var(--font-mono);
     font-size: 0.78rem;
     letter-spacing: 0.03em;
@@ -72,5 +77,9 @@ const year = new Date().getFullYear();
 
   .links a:hover {
     color: var(--accent-text);
+  }
+
+  .links :global(.social-icon) {
+    font-size: 1rem;
   }
 </style>

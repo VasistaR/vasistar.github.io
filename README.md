@@ -48,7 +48,11 @@ Same idea. Mark two or three with `featured: true` and they'll also show on the 
 
 See **Deploying** below — this is the one that decides whether your links work.
 
-Then replace `public/favicon.svg`, and drop your resume at `public/resume.pdf` so the header link resolves.
+Then replace `public/favicon.svg`.
+
+**Headshot** — drop a square photo in `public/` (e.g. `public/headshot.jpg`) and set `headshot: '/headshot.jpg'` in `src/consts.ts`. It's cropped to a circle at the centre of the home page orbit graphic. Until you set it, an initials monogram fills the space.
+
+**Resume** — the "Resume" social link points at `/experience`, which is the page itself. If you also want a downloadable PDF, put it in `public/` and set `RESUME_PDF = '/resume.pdf'` in `src/consts.ts`; a download button then appears on the Experience page. Leave it empty and no button renders, so nothing ever links to a missing file.
 
 ---
 
@@ -156,7 +160,9 @@ The tag only loads in production builds, so local development never pollutes you
 
 ## How the theme works
 
-The site defaults to your operating system's light/dark preference and follows it live if you change it. The header button cycles **System → Light → Dark**, storing an override in `localStorage`; picking System clears it.
+The site defaults to your operating system's light/dark preference and follows it live if you change it. The header button is a simple **Light ⇄ Dark** toggle; the first click stores an override in `localStorage`, which from then on wins over the OS setting.
+
+To go back to following the OS, clear the stored value (`localStorage.removeItem('theme')` in the browser console, or just clear site data).
 
 An inline script in `<head>` sets the theme before the first paint, so there's no flash of the wrong colors on load.
 
