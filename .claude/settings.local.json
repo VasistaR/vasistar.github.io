@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:fonts.googleapis.com)",
+      "Bash(perl -0pi -e \"s/^\\(date: 2026-02-09\\)$/\\\\$1\\\\ncategories: ['research']/m\" cfd-mesh-sweeper.md)",
+      "Bash(perl -0pi -e \"s/^\\(date: 2025-11-02\\)$/\\\\$1\\\\ncategories: ['leadership', 'personal']/m\" flight-computer-firmware.md)",
+      "Bash(perl -0pi -e \"s/^\\(date: 2025-08-21\\)$/\\\\$1\\\\ncategories: ['personal']/m\" orbit-visualizer.md)",
+      "Bash(perl -0pi -e \"s/^\\(date: 2026-07-30\\)$/\\\\$1\\\\ncategories: ['personal']/m\" this-website.md)",
+      "Bash(perl -0pi -e \"s/^\\(date: 2026-04-18\\)$/\\\\$1\\\\ncategories: ['personal', 'research']/m\" trajectory-optimizer.md)",
+      "Bash(rm -rf dist)",
+      "Bash(npm run *)",
+      "Bash(cp src/content/projects/orbit-visualizer.md /tmp/ov.bak)",
+      "Bash(perl -0pi -e \"s/categories: \\\\['personal'\\\\]/categories: ['persnal']/\" src/content/projects/orbit-visualizer.md)",
+      "Bash(grep -iA6 \"error\\\\|invalid\")",
+      "Bash(mkdir -p public/images/projects)",
+      "Bash(cp __TRACKED_VAR__/proj-list.png public/images/projects/t1.png)",
+      "Bash(cp __TRACKED_VAR__/awards.png public/images/projects/t2.png)",
+      "Bash(cp __TRACKED_VAR__/proj-skills.png public/images/projects/t3.png)",
+      "Bash(cp src/content/projects/trajectory-optimizer.md /tmp/to.bak)",
+      "Bash(python -)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

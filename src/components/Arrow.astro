@@ -1,0 +1,43 @@
+---
+/**
+ * Arrow glyph as inline SVG.
+ *
+ * Geomini has no arrow characters, so "→" and friends would silently fall back
+ * to a different typeface with different weight and metrics. Drawing them keeps
+ * arrows consistent with the surrounding text in any font.
+ *
+ * Sized in `em`, coloured with `currentColor` — it inherits from its context.
+ */
+interface Props {
+  dir?: 'right' | 'left' | 'up-right' | 'down';
+}
+
+const { dir = 'right' } = Astro.props;
+---
+
+<svg
+  class="arrow-glyph"
+  viewBox="0 0 16 16"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {dir === 'right' && <path d="M2.5 8h11M9.2 3.6 13.5 8l-4.3 4.4" />}
+  {dir === 'left' && <path d="M13.5 8h-11M6.8 3.6 2.5 8l4.3 4.4" />}
+  {dir === 'up-right' && <path d="M4.6 11.4 11.4 4.6M5.8 4.6h5.6v5.6" />}
+  {dir === 'down' && <path d="M8 2.5v11M3.6 9.2 8 13.5l4.4-4.3" />}
+</svg>
+
+<style>
+  .arrow-glyph {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    vertical-align: -0.13em;
+  }
+</style>

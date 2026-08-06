@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../utils/url';
+import Arrow from '../../components/Arrow.astro';
 
 // Drafts are excluded from the production build but still visible in `npm run dev`.
 const posts = (await getCollection('blog', ({ data }) => !data.draft || import.meta.env.DEV)).sort(
@@ -36,7 +37,7 @@ const fmt = (d: Date) =>
         them. Occasionally a proper project post-mortem.
       </p>
       <p class="feed">
-        <a href={withBase(`/rss.xml`)}>RSS feed →</a>
+        <a href={withBase(`/rss.xml`)}>RSS feed <Arrow /></a>
       </p>
     </header>
 
@@ -70,7 +71,7 @@ const fmt = (d: Date) =>
                       )}
                     </div>
                     <span class="chev" aria-hidden="true">
-                      →
+                      <Arrow />
                     </span>
                   </a>
                 </li>

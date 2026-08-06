@@ -2,10 +2,10 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, SOCIALS } from '../consts';
-import { PROJECTS } from '../data/projects';
 import { EXPERIENCE } from '../data/experience';
 import { withBase, isExternal } from '../utils/url';
 import SocialIcon from '../components/SocialIcon.astro';
+import Arrow from '../components/Arrow.astro';
 
 // Falls back to an initials monogram until a headshot path is set in consts.ts.
 const initials = SITE.name
@@ -15,7 +15,10 @@ const initials = SITE.name
   .slice(0, 2)
   .toUpperCase();
 
-const featured = PROJECTS.filter((p) => p.featured).slice(0, 3);
+const featured = (await getCollection('projects', ({ data }) => data.featured && !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
 const recentRoles = EXPERIENCE.slice(0, 3);
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
@@ -160,17 +163,19 @@ const fmt = (d: Date) =>
           featured.map((p) => (
             <article class="card feature">
               <header>
-                <h3>{p.title}</h3>
-                <span class="year">{p.year}</span>
+                <h3>
+                  <a href={withBase(`/projects/${p.id}`)}>{p.data.title}</a>
+                </h3>
+                <span class="year">{p.data.date.getUTCFullYear()}</span>
               </header>
-              <p>{p.blurb}</p>
-              {p.highlight && (
+              <p>{p.data.description}</p>
+              {p.data.highlight && (
                 <p class="stat">
-                  <strong>{p.highlight.value}</strong> {p.highlight.label}
+                  <strong>{p.data.highlight.value}</strong> {p.data.highlight.label}
                 </p>
               )}
               <ul class="tag-list">
-                {p.tags.slice(0, 3).map((t) => (
+                {p.data.tags.slice(0, 3).map((t) => (
                   <li class="tag">{t}</li>
                 ))}
               </ul>
@@ -179,7 +184,7 @@ const fmt = (d: Date) =>
         }
       </div>
       <a class="arrow-link more" href={withBase(`/projects`)}>
-        <span>All projects</span><span>→</span>
+        <span>All projects</span><span><Arrow /></span>
       </a>
     </section>
 
@@ -198,7 +203,7 @@ const fmt = (d: Date) =>
         }
       </ul>
       <a class="arrow-link more" href={withBase(`/experience`)}>
-        <span>Full experience</span><span>→</span>
+        <span>Full experience</span><span><Arrow /></span>
       </a>
     </section>
 
@@ -220,7 +225,7 @@ const fmt = (d: Date) =>
           </ul>
           <a class="arrow-link more" href={withBase(`/blog`)}>
             <span>All posts</span>
-            <span>→</span>
+            <span><Arrow /></span>
           </a>
         </section>
       )
@@ -372,28 +377,69 @@ const fmt = (d: Date) =>
     fill: var(--accent);
   }
 
+  /*
+    Mobile hero.
+
+    Goal: everything visible in the desktop first screen — portrait, status,
+    heading, lede, buttons and social links — also lands above the fold on a
+    phone. That means tightening every vertical measure, not just stacking the
+    columns. Sizes here were set by measuring against a 375px-tall-viewport
+    phone rather than by eye.
+  */
   @media (max-width: 52rem) {
     .hero {
       grid-template-columns: 1fr;
       justify-items: center;
       text-align: center;
+      gap: 1.1rem;
     }
-    .lede {
-      margin-inline: auto;
-    }
-    .cta,
-    .socials,
-    .status {
-      justify-content: center;
-    }
-    /*
-      Lead with the portrait on phones. Left below the copy it lands well past
-      the fold, which defeats the point of having it.
-    */
+
+    /* Portrait leads, but small enough to leave room for the copy. */
     .orbit {
       order: -1;
-      width: min(215px, 54vw);
-      margin-bottom: 0.5rem;
+      width: min(148px, 38vw);
+      margin-bottom: 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.6rem, 6.2vw, 2.05rem);
+      margin-block: 0.75rem 0.7rem;
+    }
+
+    .lede {
+      font-size: 0.93rem;
+      line-height: 1.5;
+      margin-inline: auto;
+    }
+
+    .cta {
+      margin-top: 1.15rem;
+      justify-content: center;
+    }
+
+    .cta .btn {
+      padding: 0.55rem 1rem;
+      font-size: 0.88rem;
+    }
+
+    .socials {
+      margin-top: 1.1rem;
+      gap: 0.85rem;
+      justify-content: center;
+    }
+
+    .socials a {
+      gap: 0.32rem;
+      font-size: 0.71rem;
+    }
+
+    .socials :global(.social-icon) {
+      font-size: 0.95rem;
+    }
+
+    .status {
+      justify-content: center;
+      font-size: 0.66rem;
     }
   }
 
@@ -425,8 +471,28 @@ const fmt = (d: Date) =>
     gap: 0.75rem;
   }
 
+  .feature {
+    position: relative;
+  }
+
   .feature h3 {
     font-size: 1.06rem;
+  }
+
+  .feature h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Make the whole card clickable via the title link. */
+  .feature h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .feature h3 a:hover {
+    color: var(--accent-text);
   }
 
   .year {

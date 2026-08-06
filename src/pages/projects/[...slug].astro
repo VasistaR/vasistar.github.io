@@ -1,0 +1,324 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Carousel from '../../components/Carousel.astro';
+import Arrow from '../../components/Arrow.astro';
+import { withBase, isExternal } from '../../utils/url';
+import { categoryLabel } from '../../data/categories';
+
+export async function getStaticPaths() {
+  const projects = await getCollection(
+    'projects',
+    ({ data }) => !data.draft || import.meta.env.DEV
+  );
+  const sorted = projects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return sorted.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, newer: sorted[i - 1], older: sorted[i + 1] },
+  }));
+}
+
+type Props = {
+  project: CollectionEntry<'projects'>;
+  newer?: CollectionEntry<'projects'>;
+  older?: CollectionEntry<'projects'>;
+};
+
+const { project, newer, older } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+
+// The cover is just the first slide, so every image lives in one carousel.
+const images = [
+  ...(d.cover ? [{ src: d.cover, alt: d.coverAlt ?? `${d.title} — cover image` }] : []),
+  ...d.gallery,
+];
+---
+
+<BaseLayout title={d.title} description={d.description} ogType="article">
+  <article class="wrap">
+    <a class="back arrow-link" href={withBase('/projects')}>
+      <span aria-hidden="true"><Arrow dir="left" /></span><span>All projects</span>
+    </a>
+
+    <header class="project-header">
+      <p class="meta">
+        <span>{d.date.getUTCFullYear()}</span>
+        {
+          d.categories.map((c) => (
+            <a class="cat" href={withBase(`/projects?filter=${c}`)}>
+              {categoryLabel(c)}
+            </a>
+          ))
+        }
+        {d.draft && <span class="draft">Draft</span>}
+      </p>
+
+      <h1>{d.title}</h1>
+      <p class="lede">{d.description}</p>
+
+      <!-- Skills sit here, directly under the title, rather than at the foot. -->
+      {
+        d.skills.length > 0 && (
+          <div class="skills">
+            <h2>Skills used</h2>
+            <ul>
+              {d.skills.map((s) => (
+                <li>{s}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      {
+        d.links.length > 0 && (
+          <div class="links">
+            {d.links.map((l, i) => (
+              <a
+                class:list={['btn', i === 0 && 'btn-primary']}
+                href={withBase(l.href)}
+                target={isExternal(l.href) ? '_blank' : undefined}
+                rel={isExternal(l.href) ? 'noopener noreferrer' : undefined}
+              >
+                {l.label}
+                <span aria-hidden="true"><Arrow dir={isExternal(l.href) ? 'up-right' : 'right'} /></span>
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        d.highlight && (
+          <p class="stat">
+            <strong>{d.highlight.value}</strong>
+            <span>{d.highlight.label}</span>
+          </p>
+        )
+      }
+    </header>
+
+    <!-- ================= IMAGES ================= -->
+    <Carousel images={images} label={`${d.title} images`} />
+
+    <!-- ================= WRITE-UP ================= -->
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      (newer || older) && (
+        <nav class="project-nav" aria-label="More projects">
+          {older ? (
+            <a href={withBase(`/projects/${older.id}`)} class="nav-card">
+              <span class="dir"><Arrow dir="left" /> Older</span>
+              <span class="nav-title">{older.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <a href={withBase(`/projects/${newer.id}`)} class="nav-card align-end">
+              <span class="dir">Newer <Arrow /></span>
+              <span class="nav-title">{newer.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .back:hover {
+    color: var(--accent-text);
+  }
+
+  .back:hover span:last-child {
+    transform: none;
+  }
+
+  .project-header {
+    max-width: var(--measure);
+    margin-block: 2.2rem 2.5rem;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .draft {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ember);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .project-header h1 {
+    font-size: var(--step-3);
+    margin-block: 0.8rem 1rem;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.8rem;
+  }
+
+  .stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 1.6rem;
+    padding: 0.65rem 0.95rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+
+  .stat strong {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--ember);
+    line-height: 1;
+  }
+
+  .stat span {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  /* Category pills in the meta line link back to the filtered listing. */
+  .cat {
+    font-size: 0.63rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: filter 0.15s var(--ease);
+  }
+
+  .cat:hover {
+    filter: brightness(1.08);
+    text-decoration: none;
+  }
+
+  /* ---------- skills, directly under the title ---------- */
+  .skills {
+    margin-top: 1.8rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+  }
+
+  .skills h2 {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .skills ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+  }
+
+  .skills li {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.65rem;
+  }
+
+  /* ---------- prev / next ---------- */
+  .project-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
+  }
+
+  .nav-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .align-end {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .dir {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .nav-title {
+    font-size: 0.94rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 40rem) {
+    .project-nav {
+      grid-template-columns: 1fr;
+    }
+    .align-end {
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+</style>

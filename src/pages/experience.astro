@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { EXPERIENCE, COURSEWORK, SKILLS } from '../data/experience';
 import { RESUME_PDF } from '../consts';
 import { withBase } from '../utils/url';
+import Arrow from '../components/Arrow.astro';
 ---
 
 <BaseLayout
@@ -21,7 +22,7 @@ import { withBase } from '../utils/url';
         RESUME_PDF && (
           <p class="resume">
             <a class="btn" href={withBase(RESUME_PDF)} target="_blank" rel="noopener noreferrer">
-              Download resume ↓
+              Download resume <Arrow dir="down" />
             </a>
           </p>
         )

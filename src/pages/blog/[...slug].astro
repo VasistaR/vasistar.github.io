@@ -2,6 +2,7 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../utils/url';
+import Arrow from '../../components/Arrow.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft || import.meta.env.DEV);
@@ -45,7 +46,7 @@ const readingTime: string | undefined = remarkPluginFrontmatter?.minutesRead;
 <BaseLayout title={post.data.title} description={post.data.description} ogType="article">
   <article class="wrap">
     <a class="back arrow-link" href={withBase(`/blog`)}>
-      <span aria-hidden="true">←</span><span>Back to blog</span>
+      <span aria-hidden="true"><Arrow dir="left" /></span><span>Back to blog</span>
     </a>
 
     <header class="post-header">
@@ -84,7 +85,7 @@ const readingTime: string | undefined = remarkPluginFrontmatter?.minutesRead;
         <nav class="post-nav" aria-label="More posts">
           {older ? (
             <a href={withBase(`/blog/${older.id}`)} class="nav-card">
-              <span class="dir">← Older</span>
+              <span class="dir"><Arrow dir="left" /> Older</span>
               <span class="nav-title">{older.data.title}</span>
             </a>
           ) : (
@@ -92,7 +93,7 @@ const readingTime: string | undefined = remarkPluginFrontmatter?.minutesRead;
           )}
           {newer && (
             <a href={withBase(`/blog/${newer.id}`)} class="nav-card align-end">
-              <span class="dir">Newer →</span>
+              <span class="dir">Newer <Arrow /></span>
               <span class="nav-title">{newer.data.title}</span>
             </a>
           )}

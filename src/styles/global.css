@@ -5,9 +5,16 @@
    =========================================================================== */
 
 :root {
-  /* Type */
-  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /*
+    Type — Geomini (FontBob), a variable geometric sans used site-wide.
+
+    `--font-mono` is a role, not a promise: it styles the small uppercase
+    labels, dates, tags and code blocks. It points at Geomini too, so the site
+    uses one typeface throughout. If code alignment ever matters more than
+    consistency, change only this line back to a monospace stack.
+  */
+  --font-sans: 'Geomini', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geomini', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Scale */
   --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
@@ -147,6 +154,15 @@ video {
   display: block;
 }
 
+/*
+  The browser's own `[hidden] { display: none }` lives in the UA stylesheet, so
+  ANY author `display` rule beats it — an element with `display: flex` stays
+  visible even when hidden. This restores the expected behaviour site-wide.
+*/
+[hidden] {
+  display: none !important;
+}
+
 ul,
 ol {
   padding-inline-start: 1.15em;
@@ -196,6 +212,13 @@ kbd {
 main {
   flex: 1;
   padding-block: clamp(3rem, 8vw, 5.5rem) clamp(4rem, 10vw, 7rem);
+}
+
+/* Reclaim vertical space on phones so hero content stays above the fold. */
+@media (max-width: 52rem) {
+  main {
+    padding-block: 1.6rem 3.5rem;
+  }
 }
 
 .stack > * + * {
