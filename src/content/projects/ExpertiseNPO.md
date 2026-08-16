@@ -1,9 +1,9 @@
 ---
-title: 'Trajectory Optimizer'
+title: 'ExpertiseNPO'
 description: 'A direct-collocation solver that plans fuel-optimal ascent trajectories for a two-stage launch vehicle.'
 date: 2026-04-18
-categories: ['personal', 'research']
-featured: true
+categories: ['leadership']
+featured: false
 tags: ['Python', 'Optimization', 'Orbital Mechanics']
 skills:
   - 'Nonlinear programming (IPOPT / CasADi)'

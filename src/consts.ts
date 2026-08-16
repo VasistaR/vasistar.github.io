@@ -48,7 +48,7 @@ export const RESUME_PDF = '';
  * Leave it as an empty string to disable analytics entirely.
  * The script only loads on the production build — `npm run dev` never tracks.
  * ------------------------------------------------------------------------- */
-export const GA_MEASUREMENT_ID = '';
+export const GA_MEASUREMENT_ID = 'G-VL8QNQPVD0';
 
 /* ---------------------------------------------------------------------------
  * NAVIGATION

@@ -23,6 +23,7 @@ export interface ProjectCategory {
 }
 
 export const PROJECT_CATEGORIES: ProjectCategory[] = [
+  { id: 'industry', label: 'Industry' },
   { id: 'personal', label: 'Personal' },
   { id: 'research', label: 'Research' },
   { id: 'leadership', label: 'Leadership' },

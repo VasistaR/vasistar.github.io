@@ -1,9 +1,9 @@
 ---
-title: 'CFD Mesh Sweeper'
+title: 'Low Earth Orbit (LEO) Satellite Simulator'
 description: 'A CLI that runs grid-convergence studies across an OpenFOAM case matrix and reports Richardson extrapolation.'
 date: 2026-02-09
-categories: ['research']
-featured: true
+categories: ['personal']
+featured: false
 tags: ['Python', 'OpenFOAM', 'Automation']
 skills:
   - 'Computational fluid dynamics (OpenFOAM)'

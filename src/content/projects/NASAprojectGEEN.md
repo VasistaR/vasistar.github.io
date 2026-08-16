@@ -1,8 +1,9 @@
 ---
-title: 'Wind Tunnel Data Pipeline'
+title: 'Electricity Generation System Using Wasted Heat from Solar Panels'
 description: 'Ingests raw load-cell and pressure-tap data, applies corrections, and outputs publication-ready plots.'
 date: 2025-10-06
-categories: ['research']
+categories: ['industry', 'personal']
+featured: false
 tags: ['Python', 'Pandas', 'Data']
 skills:
   - 'Experimental aerodynamics and tunnel corrections'

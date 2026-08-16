@@ -1,9 +1,9 @@
 ---
-title: 'Flight Computer Firmware'
+title: 'Healio - AI Diagnoser and Low Cost Drug Prescriber'
 description: 'Bare-metal firmware for a high-power rocket: sensor fusion, apogee detection, and dual-deploy recovery.'
 date: 2025-11-02
-categories: ['leadership', 'personal']
-featured: true
+categories: ['personal']
+featured: false
 tags: ['C', 'STM32', 'Sensor Fusion']
 skills:
   - 'Embedded C on ARM Cortex-M'
@@ -13,8 +13,8 @@ skills:
   - 'Hardware-in-the-loop test rigs'
   - 'Oscilloscope and logic analyzer debugging'
 highlight:
-  value: '200 Hz'
-  label: 'control loop'
+  value: '3rd Place'
+  label: 'Health Track'
 links:
   - label: 'GitHub'
     href: 'https://github.com/VasistaR/flight-computer'

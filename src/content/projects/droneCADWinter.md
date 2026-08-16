@@ -1,8 +1,9 @@
 ---
-title: 'Orbit Visualizer'
+title: 'Reconnaissance Drone for Military Applications'
 description: 'An interactive web tool for propagating and comparing satellite orbits from TLE data.'
 date: 2025-08-21
 categories: ['personal']
+featured: false
 tags: ['TypeScript', 'Three.js', 'WebGL']
 skills:
   - 'SGP4 orbit propagation'
