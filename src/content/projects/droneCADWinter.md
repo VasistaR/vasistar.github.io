@@ -1,7 +1,7 @@
 ---
 title: 'Reconnaissance Drone for Military Applications'
-description: 'An interactive web tool for propagating and comparing satellite orbits from TLE data.'
-date: 2025-08-21
+description: 'A model of a drone that can be used for military reconnaissance purposes, CADed using Onshape.'
+date: 2025-12-21
 categories: ['personal']
 featured: false
 tags: ['TypeScript', 'Three.js', 'WebGL']

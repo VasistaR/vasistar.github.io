@@ -1,32 +1,33 @@
 ---
 title: 'Economic Development and Trade Commission'
-description: 'Bare-metal firmware for a high-power rocket: sensor fusion, apogee detection, and dual-deploy recovery.'
-date: 2025-11-02
+description: 'Served as a student commissioner on my city economic commission, instrumental in organizing engineering workshops.'
+date: 2025-08-15
 categories: ['industry', 'leadership']
 featured: false
-tags: ['C', 'STM32', 'Sensor Fusion']
+tags: ['Leadership', 'Communication', 'Active listening', 'Conflict resolution', 'Critical thinking', 'Complex problem-solving']
 skills:
-  - 'Embedded C on ARM Cortex-M'
-  - 'Complementary and Kalman filtering'
-  - 'Real-time scheduling and interrupt design'
-  - 'I2C / SPI sensor integration'
-  - 'Hardware-in-the-loop test rigs'
-  - 'Oscilloscope and logic analyzer debugging'
-highlight:
-  value: '200 Hz'
-  label: 'control loop'
+  - 'Leadership'
+  - 'Communication'
+  - 'Active listening'
+  - 'Conflict resolution'
+  - 'Critical thinking'
+  - 'Complex problem-solving'
+# highlight:
+#   value: '200 Hz'
+#   label: 'control loop'
 links:
-  - label: 'GitHub'
-    href: 'https://github.com/VasistaR/flight-computer'
+  - label: 'City appointments list'
+    href: 'https://www.milpitas.gov/DocumentCenter/View/4971/Commission-Appointments-2024-PDF'
+  - label: 'Workshops/Hackathon organized'
+    href: 'https://1.milpitashacks.com/'
 # cover: '/images/projects/flight-computer-board.jpg'
 # coverAlt: 'The assembled flight computer board with sensors and connectors'
 ---
 
-The recovery system is the part of an amateur rocket that decides whether you get the vehicle back. This firmware runs it.
 
-## What it does
+## My role
 
-It estimates altitude and vertical velocity in flight, detects apogee, and fires two pyrotechnic charges — a drogue at apogee and a main parachute at a set altitude during descent. Everything is logged to onboard flash so each flight produces a dataset.
+I was the student commissioner of the 
 
 ## Design decisions
 
