@@ -1,7 +1,7 @@
 ---
-title: ' udemy course project 1'
-description: 'Bare-metal firmware for a high-power rocket: sensor fusion, apogee detection, and dual-deploy recovery.'
-date: 2025-11-02
+title: ' Missile Guidance, Navigation, and Control (GNC) System with Obstacle Avoidance'
+description: 'Full GNC system for a missile with kalman filter, obstacle avoidance, and software in the loop testing in MATLAB/Simulink and FlightGear.'
+date: 2026-08-31
 categories: ['personal']
 featured: true
 tags: ['C', 'STM32', 'Sensor Fusion']

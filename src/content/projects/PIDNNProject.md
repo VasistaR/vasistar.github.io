@@ -1,7 +1,7 @@
 ---
-title: ' udemy course project 2'
-description: 'Bare-metal firmware for a high-power rocket: sensor fusion, apogee detection, and dual-deploy recovery.'
-date: 2025-11-02
+title: 'Fighter Jet Controller using ESP32/Arduino Uno and Neural Networks'
+description: 'This is a hardware-in-the-loop-style aircraft pitch control split across two microcontrollers, with the results streamed to a PC and visualized in FlightGear.'
+date: 2026-08-30
 categories: ['personal']
 featured: true
 tags: ['C', 'STM32', 'Sensor Fusion']
